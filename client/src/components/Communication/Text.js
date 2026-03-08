@@ -1,0 +1,1 @@
+/* Currently text communication is handled within the chat component*/

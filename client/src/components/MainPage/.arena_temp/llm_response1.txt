@@ -1,0 +1,57 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const Timer = ({ appData }) => {
+  const {  alert, partnerId }  = appData || {}; // Access room context
+  const [timeLeft, setTimeLeft] = useState(10 * 60); // 10 minutes in seconds
+  
+  const navigate = useNavigate();
+
+  // Edit this to use the actual time so it isn't wrong. 
+  useEffect(() => {
+    let timer;
+    if (partnerId !== false) {
+      timer = setInterval(() => {
+        setTimeLeft((prevTime) => {
+          if (prevTime <= 0) {
+            clearInterval(timer);
+            if(!alert){
+              navigate('/timeoutPage');
+            }
+          }
+          
+          return prevTime - 1;
+        });
+      }, 1000);
+    }
+
+    return () => clearInterval(timer);
+  }, [alert, partnerId, navigate]);
+
+  // Format the time as MM:SS
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="timer-container">
+        <div className="countdown-timer">
+            <h2>Time Left: {formatTime(timeLeft)}</h2>
+            <div className="progress">
+            <div
+                className="progress-bar progress-bar-striped bg-success"
+                role="progressbar"
+                style={{ width: `${(timeLeft / 600) * 100}%` }}
+                aria-valuenow={timeLeft}
+                aria-valuemin="0"
+                aria-valuemax="600"
+            ></div>
+            </div>
+        </div>
+    </div>
+  );
+};
+
+export default Timer;

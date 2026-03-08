@@ -1,0 +1,37 @@
+{
+    "name": "agent-selection-app",
+    "version": "1.0.0",
+    "description": "Agent Selection App with client and server",
+    "main": "server/index.js",
+    "scripts": {
+        "start": "node server/index.js",
+        "client": "npm start --prefix client",
+        "server": "nodemon server/index.js",
+        "dev": "concurrently \"npm run client\" \"npm run server\"",
+        "dev-local": "NODE_ENV=development concurrently \"npm run client\" \"NODE_ENV=development npm run server\"",
+        "build": "concurrently \"npm run build-client\" \"node server/index.js\"",
+        "build-client": "npm run build --prefix client",
+        "build-server": "echo \"Server ready for production\"",
+        "heroku-postbuild": "npm install --prefix server && npm install --include=dev --prefix client && npm run build --prefix client",
+        "public-serve": "serve -s client/public -l 5000"
+    },
+    "dependencies": {
+        "axios": "^1.7.9",
+        "dotenv": "^16.4.7",
+        "express": "^4.18.2",
+        "nodemon": "^3.1.9",
+        "papaparse": "^5.5.2",
+        "react-markdown": "^9.0.1",
+        "remark-gfm": "^4.0.0",
+        "socket.io": "^4.6.1"
+    },
+    "devDependencies": {
+        "concurrently": "^7.6.0",
+        "cross-env": "^7.0.3"
+    },
+    "engines": {
+        "node": ">=14.0.0"
+    },
+    "author": "Your Name",
+    "license": "MIT"
+}

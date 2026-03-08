@@ -1,0 +1,3 @@
+## The Roles in the Negotiation
+
+One of you will play the role of **SellTech Co** (the **Seller**), and the other will play the role of **GreenBuy Energy** (the **Buyer**). You will both get some information about the setting and the transaction, providing you with some background for the negotiation. In addition to this, each of you has some private information that the other person doesn't know. This will help you decide on your strategy in the negotiation, such as how much to offer to the other party or what offer to accept. To get the best possible outcome and maximize your bonus earnings, think carefully about what to share and how to present your case.
