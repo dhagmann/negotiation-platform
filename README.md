@@ -1,120 +1,70 @@
-# Negotiation Experiment Platform
+# Negotiation Platform
 
-A web-based platform for running real-time negotiation experiments. The platform pairs participants as buyers and sellers who negotiate the price of a battery unit through a structured chat interface. It handles the full experiment flow: participant onboarding, role assignment, comprehension checks, real-time matching, timed negotiations with offer mechanics, and post-experiment surveys.
+Pairs participants as buyers and sellers in a simulated battery-unit sale negotiation, varying outside options (BATNA) to study how disagreement points affect negotiated outcomes.
 
-## Disclaimer
+![Status](https://img.shields.io/badge/status-not_deployed-lightgrey)
+![Database](https://img.shields.io/badge/database-unknown-lightgrey)
+![Preregistration](https://img.shields.io/badge/preregistered-not_preregistered-lightgrey)
 
-This software is provided as-is for research and educational purposes. **No guarantees of functionality, security, or suitability for any particular purpose are made. No technical support is provided.** Use at your own risk.
+## Study
 
-## Demo Mode
+Participants are recruited via Prolific and randomly assigned one of four roles: optimistic buyer, pessimistic buyer, optimistic seller, or pessimistic seller. Each role carries a different outside-option value (BATNA) that shapes their private instructions. Matched pairs negotiate in real time via text chat; outcomes, pre-negotiation expectations, and post-negotiation demographics are all recorded.
 
-Demo mode lets you experience the full experiment flow on your own computer without needing a database or any external services. You walk through the experiment as a single user; when you reach the matching stage, the system automatically simulates a partner so you can explore the chat and offer interface. No data is saved anywhere — everything is held in temporary memory and disappears when you stop the server.
+- **Conditions:** `optimisticBuyer` (BATNA $2.5m), `pessimisticBuyer` (BATNA $3.5m), `optimisticSeller` (BATNA $3.0m), `pessimisticSeller` (BATNA $2.0m)
+- **Randomization:** Server-side balanced assignment — incoming participant is assigned to whichever side (buyer or seller) currently has fewer waiting participants; optimistic vs. pessimistic variant chosen at random within that side
 
-### Running in Demo Mode
+## Data collected
 
-1. Make sure you have [Node.js](https://nodejs.org/) (version 14 or higher) installed.
-
-2. Install dependencies:
-   ```bash
-   npm install
-   cd client && npm install && cd ..
-   cd server && npm install && cd ..
-   ```
-
-3. Create a `.env` file in the root directory with:
-   ```
-   DEMO_MODE=true
-   ```
-
-4. Start the application:
-   ```bash
-   npm run dev-local
-   ```
-
-5. Open http://localhost:3000 in your browser and enter any text as a participant ID.
-
-### What to Expect in Demo Mode
-
-- You will go through the full experiment flow: introduction pages, role instructions, a comprehension quiz, and then the negotiation.
-- At the matching stage, you will briefly see a "Waiting" message before being automatically matched with a simulated partner.
-- In the chat, you can send messages and make offers. Offers from your simulated partner will be auto-accepted after a couple of seconds so you can complete the full negotiation flow (accept, confirm, reach agreement).
-- After the chat, you can complete the post-experiment surveys and see the payment page.
-- All data is temporary. Restarting the server clears everything.
-
-## Production Deployment
-
-To run real experiments with multiple participants being matched together, you need a PostgreSQL database and a hosting platform.
-
-### Prerequisites
-
-- Node.js 14+
-- A PostgreSQL database (tested with AWS Aurora Serverless v2, but any PostgreSQL instance works)
-- A hosting platform such as Heroku
-
-### Database Setup
-
-1. Create a PostgreSQL database.
-2. Copy `env.template` to `.env` in the root directory.
-3. Fill in your database credentials:
-   ```
-   DB_HOST=your-database-host
-   DB_USER=your_db_user
-   DB_PASSWORD=your_password
-   DB_NAME=your_database_name
-   DB_PORT=5432
-   ```
-   Alternatively, you can provide a single connection URL:
-   ```
-   POSTGRES_DATABASE_URL=postgresql://user:password@host:5432/dbname
-   ```
-4. Make sure `DEMO_MODE` is **not** set (or set to `false`).
-5. Database tables are created automatically on first run.
-
-### Environment Variables
-
-| Variable | Required | Description |
+| Field | Type | Notes |
 |---|---|---|
-| `DEMO_MODE` | No | Set to `true` to run in demo mode (no database needed) |
-| `NODE_ENV` | Yes | `development` or `production` |
-| `DB_HOST` | For production | Database hostname |
-| `DB_USER` | For production | Database username |
-| `DB_PASSWORD` | For production | Database password |
-| `DB_NAME` | For production | Database name |
-| `DB_PORT` | For production | Database port (default: 5432) |
-| `POSTGRES_DATABASE_URL` | Alternative | Full PostgreSQL connection URL (use instead of individual DB_ variables) |
-| `PORT` | No | Server port (default: 5000) |
+| `participant_id` | string | P-XXXX-XXXX format, server-generated |
+| `worker_id` | string | Prolific participant ID |
+| `session_id` | string | Shared by paired participants |
+| `role` | string | Experimental condition |
+| `partner_id` | string | Paired participant's ID |
+| `partner_role` | string | Paired participant's condition |
+| `target_price` | text | Pre-negotiation target price |
+| `justification` | text | Pre-negotiation justification |
+| `walkaway_point` | text | Pre-negotiation walkaway price |
+| `expected_outcome` | string | Pre-negotiation expected outcome (multiple choice) |
+| `final_agreement` | decimal | Agreed price, if deal reached |
+| `agreement_reached` | boolean | Whether negotiation ended in deal |
+| `negotiation_duration_seconds` | integer | Chat duration |
+| `chat_started_at` | timestamp | |
+| `chat_ended_at` | timestamp | |
+| `gender` | string | Post-negotiation demographic |
+| `age` | string | Post-negotiation demographic |
+| `ethnicity` | string | Post-negotiation demographic |
+| `education` | string | Post-negotiation demographic |
+| `political_orientation` | string | Post-negotiation demographic |
+| `negotiation_experience` | string | Post-negotiation demographic |
+| `comments` | text | Open-ended comments |
+| `quiz_q1`–`quiz_q3` | string | Comprehension quiz first-attempt answers |
+| `quiz_q1_retake`–`quiz_q3_retake` | string | Comprehension quiz second-attempt answers |
+| `quiz_score` | integer | |
+| `quiz_passed` | boolean | |
+| `quiz_attempts` | integer | |
+| `completed_study` | boolean | |
+| `dropout_stage` | string | Stage at which participant exited |
 
-### Deploying to Heroku
+Chat messages are stored in a separate table: `session_id`, `sender_participant_id`, `recipient_participant_id`, `message_text`, `seconds_since_chat_start`.
 
-1. Create a Heroku app.
-2. Set your environment variables:
-   ```bash
-   heroku config:set NODE_ENV=production
-   heroku config:set POSTGRES_DATABASE_URL="postgresql://user:password@host:5432/dbname"
-   ```
-3. Push your code:
-   ```bash
-   git push heroku main
-   ```
+## Quality controls
 
-## Project Structure
+- **Attention checks:** 3-question role-specific comprehension quiz covering the negotiation scenario and the participant's assigned BATNA value; all three questions must be answered correctly
+- **Exclusion logic:** Mobile devices blocked at entry; duplicate Prolific IDs redirected to `/alreadyParticipated`; quiz failure on retake routes to `/quizFailure`; 10-minute partner-wait timeout routes to `waitingTimeout` dropout stage
 
+## Local development
+
+```bash
+npm install
+npm install --prefix client
+npm install --prefix server
+DEMO_MODE=true npm run dev-local
 ```
-client/                  React frontend application
-  src/
-    pages/               Experiment flow pages (landing, instructions, quiz, chat, payment)
-    components/          UI components (chat interface, offer slider, confirmation)
-    hooks/               Custom React hooks (socket connection management)
-server/                  Express backend
-  index.js               Main server with Socket.IO handlers and API endpoints
-  models/                Sequelize database models (Participant, ChatMessage)
-  config/                Session timeout configuration
-  utils/                 Utility modules (logging, session management)
-```
 
-## Technology Stack
+Demo mode runs with an in-memory SQLite database and a simulated partner — no external database required. Open http://localhost:3000 and enter any text as a participant ID.
 
-- **Frontend**: React, Bootstrap
-- **Backend**: Node.js, Express
-- **Real-time Communication**: Socket.IO
-- **Database**: PostgreSQL via Sequelize ORM (SQLite in demo mode)
+## Deployment
+
+Deployed to Heroku via `Procfile` (`web: npm start`). Requires a PostgreSQL database (tested with AWS Aurora Serverless v2). Set `POSTGRES_DATABASE_URL`, `NODE_ENV=production`, and connection-pool settings via `heroku config:set`. The `heroku-postbuild` script installs dependencies for both client and server and builds the React frontend. Database tables are created automatically on first run.
